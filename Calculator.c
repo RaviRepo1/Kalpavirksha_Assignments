@@ -40,12 +40,12 @@ int isempty(struct stack *stk)
     return stk->top == -1;
 }
 
+
 int priority(char c)
 {
-    if (c == '+' || c == '-')
-        return 1;
-    return 2; 
+    return (c == '+' || c == '-') ? 1 : 2;
 }
+
 
 int isoperand(char c)
 {
