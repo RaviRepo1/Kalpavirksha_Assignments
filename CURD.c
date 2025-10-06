@@ -3,15 +3,28 @@
 #include <string.h>
 #include <ctype.h>
 
+#define NAME_LEN 100
+
 typedef struct {
     int id;
-    char *name;
+    char name[NAME_LEN];
     int age;
 } User;
 
+// Functions
+void createFile();
+int isValidName(const char *name);
+int inputUserId(const char *prompt);
+User inputUser();
+void addUser();
+void displayUsers();
+int updateUser();
+int deleteUser();
+int getValidChoice();
 
+// Create an empty file /if not present
 void createFile() {
-    FILE *filePtr = fopen("users.txt", "w");
+    FILE *filePtr = fopen("users.txt", "a");
     if (filePtr == NULL) {
         printf("Error creating file!\n");
         exit(1);
@@ -23,48 +36,65 @@ void createFile() {
 int isValidName(const char *name) {
     for (int i = 0; name[i] != '\0'; i++) {
         if (!isalpha(name[i]) && name[i] != ' ') {
-            return 0; 
+            return 0;
         }
     }
     return 1;
 }
 
 
+int inputUserId(const char *prompt) {
+    int id;
+    char input[20];
+    while (1) {
+        printf("%s", prompt);
+        if (fgets(input, sizeof(input), stdin) && sscanf(input, "%d", &id) == 1) {
+            return id;
+        } else {
+            printf("Invalid input. Please enter a valid number.\n");
+        }
+    }
+}
+
+
+User inputUser() {
+    User user;
+    char input[NAME_LEN];
+
+    user.id = inputUserId("Enter User ID: ");
+
+    while (1) {
+        printf("Enter User Name: ");
+        if (fgets(input, sizeof(input), stdin)) {
+            input[strcspn(input, "\n")] = '\0'; 
+            if (isValidName(input)) {
+                strncpy(user.name, input, NAME_LEN);
+                break;
+            } else {
+                printf("Invalid name. Only alphabetic characters and spaces are allowed.\n");
+            }
+        }
+    }
+
+    user.age = inputUserId("Enter User Age: ");
+    return user;
+}
+
+// Add a new user to the file
 void addUser() {
     FILE *filePtr = fopen("users.txt", "a");
-    if (filePtr == NULL) {
+    if (!filePtr) {
         printf("Error opening file!\n");
         exit(1);
     }
 
-    User user;
-    char nameInput[100];
-
-    printf("Enter User ID: ");
-    scanf("%d", &user.id);
-
-    while (1) {
-        printf("Enter User Name: ");
-        scanf("%s", nameInput);
-        if (isValidName(nameInput)) {
-            user.name = malloc(strlen(nameInput) + 1);
-            strcpy(user.name, nameInput);
-            break;
-        } else {
-            printf("Invalid name. Please enter alphabetic characters only.\n");
-        }
-    }
-
-    printf("Enter User Age: ");
-    scanf("%d", &user.age);
-
+    User user = inputUser();
     fprintf(filePtr, "%d %s %d\n", user.id, user.name, user.age);
     fclose(filePtr);
-    free(user.name);
     printf("User added successfully!\n");
 }
 
-
+// Display all users
 void displayUsers() {
     FILE *filePtr = fopen("users.txt", "r");
     if (filePtr == NULL) {
@@ -73,52 +103,38 @@ void displayUsers() {
     }
 
     User user;
-    char nameInput[100];
-    printf("\nID\tName\tAge\n");
-    printf("---------------------\n");
-    while (fscanf(filePtr, "%d %s %d", &user.id, nameInput, &user.age) == 3) {
-        printf("%d\t%s\t%d\n", user.id, nameInput, user.age);
+    char tempName[NAME_LEN];
+    printf("\nID\tName\t\tAge\n");
+    printf("------------------------------\n");
+    while (fscanf(filePtr, "%d %s %d", &user.id, tempName, &user.age) == 3) {
+        printf("%d\t%-15s%d\n", user.id, tempName, user.age);
     }
     fclose(filePtr);
 }
 
-
-void updateUser() {
+// Update an existing user 
+int updateUser() {
     FILE *filePtr = fopen("users.txt", "r");
     FILE *tempf = fopen("temp.txt", "w");
-    if (filePtr == NULL || tempf == NULL) {
+    if (!filePtr || !tempf) {
         printf("Error opening file.\n");
-        return;
+        return 0;
     }
 
     User user;
-    char nameInput[100];
-    int Id, found = 0;
-    printf("Enter User ID to update: ");
-    scanf("%d", &Id);
+    char tempName[NAME_LEN];
+    int targetId = inputUserId("Enter User ID to update: ");
+    int found = 0;
 
-    while (fscanf(filePtr, "%d %s %d", &user.id, nameInput, &user.age) == 3) {
-        if (user.id == Id) {
+    while (fscanf(filePtr, "%d %s %d", &user.id, tempName, &user.age) == 3) {
+        if (user.id == targetId) {
             found = 1;
-            printf("Enter updated User ID: ");
-            scanf("%d", &user.id);
-
-            while (1) {
-                printf("Enter updated Name: ");
-                scanf("%s", nameInput);
-                if (isValidName(nameInput)) {
-                    user.name = malloc(strlen(nameInput) + 1);
-                    strcpy(user.name, nameInput);
-                    break;
-                } else {
-                    printf("Invalid name. Please enter alphabetic characters only.\n");
-                }
-            }
-
-            printf("Enter updated Age: ");
-            scanf("%d", &user.age);
+            printf("Enter updated details:\n");
+            User updatedUser = inputUser();
+            fprintf(tempf, "%d %s %d\n", updatedUser.id, updatedUser.name, updatedUser.age);
+        } else {
+            fprintf(tempf, "%d %s %d\n", user.id, tempName, user.age);
         }
-        fprintf(tempf, "%d %s %d\n", user.id, nameInput, user.age);
     }
 
     fclose(filePtr);
@@ -128,30 +144,31 @@ void updateUser() {
         remove("users.txt");
         rename("temp.txt", "users.txt");
         printf("User updated successfully!\n");
+        return 1;
     } else {
-        printf("User not found.\n");
         remove("temp.txt");
+        printf("User not found.\n");
+        return 0;
     }
 }
 
 
-void deleteUser() {
+int deleteUser() {
     FILE *filePtr = fopen("users.txt", "r");
     FILE *tempf = fopen("temp.txt", "w");
-    if (filePtr == NULL || tempf == NULL) {
+    if (!filePtr || !tempf) {
         printf("Error opening file.\n");
-        return;
+        return 0;
     }
 
     User user;
-    char nameInput[100];
-    int id, found = 0;
-    printf("Enter User ID to delete: ");
-    scanf("%d", &id);
+    char tempName[NAME_LEN];
+    int targetId = inputUserId("Enter User ID to delete: ");
+    int found = 0;
 
-    while (fscanf(filePtr, "%d %s %d", &user.id, nameInput, &user.age) == 3) {
-        if (user.id != id) {
-            fprintf(tempf, "%d %s %d\n", user.id, nameInput, user.age);
+    while (fscanf(filePtr, "%d %s %d", &user.id, tempName, &user.age) == 3) {
+        if (user.id != targetId) {
+            fprintf(tempf, "%d %s %d\n", user.id, tempName, user.age);
         } else {
             found = 1;
         }
@@ -164,9 +181,11 @@ void deleteUser() {
         remove("users.txt");
         rename("temp.txt", "users.txt");
         printf("User deleted successfully!\n");
+        return 1;
     } else {
-        printf("User not found.\n");
         remove("temp.txt");
+        printf("User not found.\n");
+        return 0;
     }
 }
 
@@ -192,7 +211,13 @@ int main() {
     createFile();
 
     do {
-        printf("\n1. Add User\n2. Display Users\n3. Update User\n4. Delete User\n5. Exit\n");
+        printf("\n==== User Management System ====\n");
+        printf("1. Add User\n");
+        printf("2. Display Users\n");
+        printf("3. Update User\n");
+        printf("4. Delete User\n");
+        printf("5. Exit\n");
+
         choice = getValidChoice();
 
         switch (choice) {
@@ -209,10 +234,8 @@ int main() {
                 deleteUser();
                 break;
             case 5:
-                printf("Exiting...\n");
+                printf("Exiting program. Goodbye!\n");
                 break;
-            default:
-                printf("Invalid choice! Try again.\n");
         }
     } while (choice != 5);
 
