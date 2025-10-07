@@ -115,8 +115,8 @@ void displayUsers() {
 // Update an existing user 
 int updateUser() {
     FILE *filePtr = fopen("users.txt", "r");
-    FILE *tempf = fopen("temp.txt", "w");
-    if (!filePtr || !tempf) {
+    FILE *tempFile = fopen("temp.txt", "w");
+    if (!filePtr || !tempFile) {
         printf("Error opening file.\n");
         return 0;
     }
@@ -131,14 +131,14 @@ int updateUser() {
             found = 1;
             printf("Enter updated details:\n");
             User updatedUser = inputUser();
-            fprintf(tempf, "%d %s %d\n", updatedUser.id, updatedUser.name, updatedUser.age);
+            fprintf(tempFile, "%d %s %d\n", updatedUser.id, updatedUser.name, updatedUser.age);
         } else {
-            fprintf(tempf, "%d %s %d\n", user.id, tempName, user.age);
+            fprintf(tempFile, "%d %s %d\n", user.id, tempName, user.age);
         }
     }
 
     fclose(filePtr);
-    fclose(tempf);
+    fclose(tempFile);
 
     if (found) {
         remove("users.txt");
@@ -155,8 +155,8 @@ int updateUser() {
 
 int deleteUser() {
     FILE *filePtr = fopen("users.txt", "r");
-    FILE *tempf = fopen("temp.txt", "w");
-    if (!filePtr || !tempf) {
+    FILE *tempFile = fopen("temp.txt", "w");
+    if (!filePtr || !tempFile) {
         printf("Error opening file.\n");
         return 0;
     }
@@ -168,14 +168,14 @@ int deleteUser() {
 
     while (fscanf(filePtr, "%d %s %d", &user.id, tempName, &user.age) == 3) {
         if (user.id != targetId) {
-            fprintf(tempf, "%d %s %d\n", user.id, tempName, user.age);
+            fprintf(tempFile, "%d %s %d\n", user.id, tempName, user.age);
         } else {
             found = 1;
         }
     }
 
     fclose(filePtr);
-    fclose(tempf);
+    fclose(tempFile);
 
     if (found) {
         remove("users.txt");
@@ -241,3 +241,4 @@ int main() {
 
     return 0;
 }
+
