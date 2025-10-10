@@ -22,28 +22,28 @@ This C program allows users to input student academic data and generates a **stu
 
 ## Input Format
 
-First line : Number of students (e.g., 2)
-Next lines : Roll_Number Name Marks1 Marks2 Marks3 for each student
-Example:
-2
-1 Ankit 83 79 88
-2 Tanya 94 96 90
+First line : Number of students (e.g., 2)<br/>
+Next lines : Roll_Number Name Marks1 Marks2 Marks3 for each student<br/>
+Example:<br/>
+2<br/>
+1 Ankit 83 79 88<br/>
+2 Tanya 94 96 90<br/>
 
 ## Output Format
 ========= STUDENT PERFORMANCE REPORT =========
 
-Roll : 1
-Name : Ankit
-Total : 250
-Average : 83.33
-Grade : B
-Performance: ****
+Roll : 1<br/>
+Name : Ankit<br/>
+Total : 250<br/>
+Average : 83.33<br/>
+Grade : B<br/>
+Performance: ****<br/>
 
-Roll : 2
-Name : Tanya
-Total : 280
-Average : 93.33
-Grade : A
-Performance: *****
+Roll : 2<br/>
+Name : Tanya<br/>
+Total : 280<br/>
+Average : 93.33<br/>
+Grade : A<br/>
+Performance: *****<br/>
 
 List of Roll Numbers (via recursion): 1 2
