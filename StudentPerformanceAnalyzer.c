@@ -29,22 +29,22 @@ char getStudentGrade(float average);
 void showStarsForGrade(char grade);
 void printStudentReport(const Student *student);
 void printRollNumbers(const Student students[], int n, int index);
-int isPassingGrade(char grade);
 void printAllStudentReports(const Student students[], int n);
 
 int main(void)
 {
     int n;
     Student students[MAX_NUM_STUDENTS];
+
     printf("First line  : Number of students (e.g., 2)\n");
-    printf("Next lines  : Roll_Number Name Marks1 Marks2 Marks3 for each student (e.g., 1 Raj 91 92 90)\n");
-    printf("\n");
+    printf("Next lines  : Roll_Number Name Marks1 Marks2 Marks3 for each student (e.g., 1 Raj 91 92 90)\n\n");
+
     scanf("%d", &n);
 
     readStudentData(students, n);
     printAllStudentReports(students, n);
 
-   printf("List of Roll Numbers (via recursion): ");
+    printf("List of Roll Numbers (via recursion): ");
     printRollNumbers(students, n, 0);
 
     return 0;
@@ -54,32 +54,48 @@ void readStudentData(Student students[], int n)
 {
     for (int i = 0; i < n; i++)
     {
-
-        if (scanf("%d %s %f %f %f",
-                  &students[i].roll, students[i].name,
-                  &students[i].marks[0], &students[i].marks[1], &students[i].marks[2]) != 5)
+        
+        int validInput = 0;
+        while (!validInput)
         {
-            printf("Invalid input format. Terminating program.\n");
-            exit(1);
-        }
-
-        if (students[i].roll <= 0)
-        {
-            printf("Invalid roll number. Roll number must be positive.\n");
-            exit(1);
-        }
-
-        for (int j = 0; j < TOTAL_SUBJECTS; j++)
-        {
-            if (students[i].marks[j] < 0.0f || students[i].marks[j] > 100.0f)
+            if (scanf("%d %s %f %f %f",
+                      &students[i].roll, students[i].name,
+                      &students[i].marks[0], &students[i].marks[1], &students[i].marks[2]) == 5)
             {
-                printf("Invalid marks entered. Marks must be between 0 and 100.\n");
-                exit(1);
+                
+                if (students[i].roll <= 0)
+                {
+                    printf("Invalid roll number. Roll number must be positive. Try again:\n");
+                    continue;
+                }
+
+                
+                int validMarks = 1;
+                for (int j = 0; j < TOTAL_SUBJECTS; j++)
+                {
+                    if (students[i].marks[j] < 0.0f || students[i].marks[j] > 100.0f)
+                    {
+                        printf("Invalid marks entered for subject %d. Marks must be between 0 and 100.\n", j + 1);
+                        validMarks = 0;
+                        break;
+                    }
+                }
+
+                if (validMarks)
+                    validInput = 1;
+                else
+                    printf("Please re-enter Roll, Name, and all 3 marks again:\n");
+            }
+            else
+            {
+                printf("Invalid input format. Please enter data as: Roll Name Marks1 Marks2 Marks3\n");
+                while (getchar() != '\n')
+                    ;
             }
         }
-
+       
         students[i].total = calculateTotalMarks(students[i].marks, TOTAL_SUBJECTS);
-        students[i].average = calculateAverageMarks(students[i].marks, TOTAL_SUBJECTS);
+        students[i].average = students[i].total / TOTAL_SUBJECTS; 
         students[i].grade = getStudentGrade(students[i].average);
     }
 }
@@ -92,16 +108,6 @@ float calculateTotalMarks(const float marks[], int size)
         total += marks[i];
     }
     return total;
-}
-
-float calculateAverageMarks(const float marks[], int size)
-{
-    float total = 0.0f;
-    for (int i = 0; i < size; i++)
-    {
-        total += marks[i];
-    }
-    return total / size;
 }
 
 char getStudentGrade(float average)
@@ -138,6 +144,7 @@ void showStarsForGrade(char grade)
         break;
     }
 }
+
 void printStudentReport(const Student *student)
 {
     printf("Roll       : %d\n", student->roll);
@@ -146,7 +153,7 @@ void printStudentReport(const Student *student)
     printf("Average    : %.2f\n", student->average);
     printf("Grade      : %c\n", student->grade);
 
-    if (isPassingGrade(student->grade))
+    if (student->grade != FAIL_GRADE)
     {
         printf("Performance: ");
         showStarsForGrade(student->grade);
@@ -156,16 +163,10 @@ void printStudentReport(const Student *student)
 
 void printRollNumbers(const Student students[], int n, int index)
 {
-    
     if (index == n)
         return;
     printf("%d ", students[index].roll);
     printRollNumbers(students, n, index + 1);
-}
-
-int isPassingGrade(char grade)
-{
-    return grade != FAIL_GRADE;
 }
 
 void printAllStudentReports(const Student students[], int n)
