@@ -1,4 +1,4 @@
-# 🧮 Matrix Operations in C
+# 🧮 Sonar Image Processing Matrix Operations in C
 
 This C program performs **matrix operations** such as rotation and smoothing on a square matrix.  
 You can either **input a matrix manually** or **generate a random matrix** with values between 0 and 255.  
