@@ -3,8 +3,8 @@
 #include <time.h>
 
 #define MAX_SIZE_INPUT 10
-#define MIN_RANDOM_SIZE 0
-#define MAX_RANDOM_SIZE 255
+#define MIN_INTENSITY_VALUE 0
+#define MAX_INTENSITY_VALUE 255
 
 void printMatrix(const int *ptr, int n);
 void inputMatrix(int *ptr, int n);
@@ -63,7 +63,6 @@ void generateRandomMatrix(int *ptr, int n, int minValue, int maxValue)
 
 void rotateMatrix90Clockwise(int *ptr, int n)
 {
-
     for (int i = 0; i < n; i++)
     {
         for (int j = i + 1; j < n; j++)
@@ -147,16 +146,19 @@ int main(void)
         return EXIT_FAILURE;
     }
 
-    int matrix[n][n];
-    int *ptr = &matrix[0][0];
+    int *ptr = malloc(n * n * sizeof(int));
+    if (!ptr)
+    {
+        printf("Memory allocation failed.\n");
+        return EXIT_FAILURE;
+    }
 
     srand((unsigned)time(NULL));
-    //------ For Generate random matrix with values 0-255(just uncomment these) ------
-
-    generateRandomMatrix(ptr, n, MIN_RANDOM_SIZE, MAX_RANDOM_SIZE);
-
-    //----- For a user-input matrix (to check whether the output is correct for a given test case). ------
     
+    //------ For Generate random matrix with values 0-255(just uncomment these) ------
+    generateRandomMatrix(ptr, n, MIN_INTENSITY_VALUE, MAX_INTENSITY_VALUE);
+
+    //----- For a user-input matrix (to check whether the output is correct for a given test case). For testing purpose------
     // inputMatrix(ptr, n);
 
     printf("\nOriginal Matrix (Random 0-255):\n");
@@ -170,5 +172,6 @@ int main(void)
     printf("\nMatrix after Applying Smoothing Filter:\n");
     printMatrix(ptr, n);
 
+    free(ptr);
     return EXIT_SUCCESS;
 }
