@@ -12,6 +12,7 @@ void generateRandomMatrix(int *ptr, int n, int minValue, int maxValue);
 void swap(int *a, int *b);
 void rotateMatrix90Clockwise(int *ptr, int n);
 void applySmoothingFilter(int *ptr, int n);
+int calculateNeighborsAvg(const int *ptr, const int *prevRow, int n, int row, int col);
 
 void swap(int *a, int *b)
 {
@@ -80,6 +81,34 @@ void rotateMatrix90Clockwise(int *ptr, int n)
     }
 }
 
+int calculateNeighborsAvg(const int *ptr, const int *prevRow, int n, int row, int col)
+{
+    int sum = 0, count = 0;
+
+    for (int dx = -1; dx <= 1; dx++)
+    {
+        int x = row + dx;
+        if (x < 0 || x >= n)
+            continue;
+
+        for (int dy = -1; dy <= 1; dy++)
+        {
+            int y = col + dy;
+            if (y < 0 || y >= n)
+                continue;
+
+            if (dx == -1 && row > 0)
+                sum += prevRow[y];
+            else
+                sum += *(ptr + x * n + y);
+
+            count++;
+        }
+    }
+
+    return sum / count;
+}
+
 void applySmoothingFilter(int *ptr, int n)
 {
     int *prevRow = (int *)malloc(n * sizeof(int));
@@ -97,29 +126,7 @@ void applySmoothingFilter(int *ptr, int n)
     {
         for (int j = 0; j < n; j++)
         {
-            int sum = 0, count = 0;
-
-            for (int dx = -1; dx <= 1; dx++)
-            {
-                int x = i + dx;
-                if (x < 0 || x >= n)
-                    continue;
-
-                for (int dy = -1; dy <= 1; dy++)
-                {
-                    int y = j + dy;
-                    if (y < 0 || y >= n)
-                        continue;
-
-                    if (dx == -1 && i > 0)
-                        sum += prevRow[y];
-                    else
-                        sum += *(ptr + x * n + y);
-
-                    count++;
-                }
-            }
-            currRow[j] = sum / count;
+            currRow[j] = calculateNeighborsAvg(ptr, prevRow, n, i, j);
         }
 
         for (int j = 0; j < n; j++)
@@ -154,11 +161,11 @@ int main(void)
     }
 
     srand((unsigned)time(NULL));
-    
-    //------ For Generate random matrix with values 0-255(just uncomment these) ------
+
+    //------To Generate random matrix with values 0-255 (uncomment to use) ------
     generateRandomMatrix(ptr, n, MIN_INTENSITY_VALUE, MAX_INTENSITY_VALUE);
 
-    //----- For a user-input matrix (to check whether the output is correct for a given test case). For testing purpose------
+    //----- For a user-input matrix (for testing purpose) ------
     // inputMatrix(ptr, n);
 
     printf("\nOriginal Matrix (Random 0-255):\n");
