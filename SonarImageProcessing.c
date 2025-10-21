@@ -7,7 +7,6 @@
 #define MAX_INTENSITY_VALUE 255
 
 void printMatrix(const int *ptr, int n);
-void inputMatrix(int *ptr, int n);
 void generateRandomMatrix(int *ptr, int n, int minValue, int maxValue);
 void swap(int *a, int *b);
 void rotateMatrix90Clockwise(int *ptr, int n);
@@ -30,24 +29,6 @@ void printMatrix(const int *ptr, int n)
             printf("%4d", *(ptr + i * n + j));
         }
         printf("\n");
-    }
-}
-
-void inputMatrix(int *ptr, int n)
-{
-    printf("Enter %d elements row by row:\n", n * n);
-
-    for (int i = 0; i < n; i++)
-    {
-        for (int j = 0; j < n; j++)
-        {
-            int result = scanf("%d", ptr + i * n + j);
-            if (result != 1)
-            {
-                printf("Invalid input detected.\n");
-                exit(EXIT_FAILURE);
-            }
-        }
     }
 }
 
@@ -85,19 +66,19 @@ int calculateNeighborsAvg(const int *ptr, const int *prevRow, int n, int row, in
 {
     int sum = 0, count = 0;
 
-    for (int dx = -1; dx <= 1; dx++)
+    for (int rowOffset = -1; rowOffset <= 1; rowOffset++)
     {
-        int x = row + dx;
+        int x = row + rowOffset;
         if (x < 0 || x >= n)
             continue;
 
-        for (int dy = -1; dy <= 1; dy++)
+        for (int colOffset = -1; colOffset <= 1; colOffset++)
         {
-            int y = col + dy;
+            int y = col + colOffset;
             if (y < 0 || y >= n)
                 continue;
 
-            if (dx == -1 && row > 0)
+            if (rowOffset == -1 && row > 0)
                 sum += prevRow[y];
             else
                 sum += *(ptr + x * n + y);
@@ -162,11 +143,7 @@ int main(void)
 
     srand((unsigned)time(NULL));
 
-    //------To Generate random matrix with values 0-255 (uncomment to use) ------
     generateRandomMatrix(ptr, n, MIN_INTENSITY_VALUE, MAX_INTENSITY_VALUE);
-
-    //----- For a user-input matrix (for testing purpose) ------
-    // inputMatrix(ptr, n);
 
     printf("\nOriginal Matrix (Random 0-255):\n");
     printMatrix(ptr, n);
