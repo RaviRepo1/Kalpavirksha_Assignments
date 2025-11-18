@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 #include "vfs.h"
 
 char virtualMemoryDisk[MAX_NUM_BLOCKS][MAX_SIZE_BLOCK];
@@ -33,7 +34,7 @@ void initializeFileSystem()
     setupFreeBlocks();
 
     root = (FileNode *)malloc(sizeof(FileNode));
-    root->isDirectory = 1;
+    root->isDirectory = true;
     root->parent = NULL;
     root->child = NULL;
     strcpy(root->name, "/");
@@ -104,7 +105,7 @@ void mkdir(char *name)
 
     FileNode *newDir = malloc(sizeof(FileNode));
     strcpy(newDir->name, name);
-    newDir->isDirectory = 1;
+    newDir->isDirectory = true;
     newDir->parent = cwd;
     newDir->child = NULL;
     newDir->contentSize = 0;
@@ -228,7 +229,7 @@ void create(char *name)
 
     FileNode *newFile = malloc(sizeof(FileNode));
     strcpy(newFile->name, name);
-    newFile->isDirectory = 0;
+    newFile->isDirectory = false;
     newFile->child = NULL;
     newFile->parent = cwd;
     newFile->contentSize = 0;
@@ -640,5 +641,3 @@ void takeInput()
             printf("Invalid command.\n");
     }
 }
-
-
