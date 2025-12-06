@@ -3,8 +3,7 @@
 #include <string.h>
 #include "player.h"
 #include "utils.h"
-
-extern MyTeams team[TotalTeams];
+#include "team.h"
 
 int partition(MyPlayer *players[], int low, int high)
 {
@@ -57,7 +56,7 @@ void displayTopKPlayersOfASpecificTeamByRole()
     printf("Enter Team ID: ");
     scanf("%d", &teamId);
 
-    if (teamId < 1 || teamId > TotalTeams)
+    if (teamId < 1 || teamId > TOTAL_TEAMS)
     {
         printf("Invalid Team ID\n");
         return;
@@ -88,8 +87,14 @@ void displayTopKPlayersOfASpecificTeamByRole()
     printf("Enter number of players: ");
     scanf("%d", &numberOfPlayers);
 
-    MyTeams selectedTeam = team[teamId - 1];
-    MyPlayer *current = selectedTeam.playerHead;
+    MyTeams *selectedTeam = getTeamById(teamId);
+    if (selectedTeam == NULL)
+    {
+        printf("Team not found\n");
+        return;
+    }
+
+    MyPlayer *current = selectedTeam->playerHead;
 
     MyPlayer *rolePlayers[200];
     int count = 0;
@@ -105,7 +110,7 @@ void displayTopKPlayersOfASpecificTeamByRole()
 
     if (count == 0)
     {
-        printf("No players found of %s role in Team %s\n", roleToString(role), selectedTeam.name);
+        printf("No players found of %s role in Team %s\n", roleToString(role), selectedTeam->name);
         return;
     }
 
@@ -116,7 +121,7 @@ void displayTopKPlayersOfASpecificTeamByRole()
 
     quickSort(rolePlayers, 0, count - 1, numberOfPlayers);
 
-    printf("Top %d %s of Team %s\n", numberOfPlayers, roleToString(role), selectedTeam.name);
+    printf("Top %d %s of Team %s\n", numberOfPlayers, roleToString(role), selectedTeam->name);
 
     printf("=======================================================================================================\n");
     printf("%-5s %-20s %-15s %-8s %-8s %-8s %-8s %-8s %-12s\n", "ID", "Name", "Role", "Runs", "Avg", "SR", "Wkts", "ER", "Perf.Index");
@@ -184,16 +189,17 @@ void displayAllPlayersOfAllTeams()
         return;
     }
 
-    
     MyPlayer *finalHead = NULL;
     MyPlayer *finalTail = NULL;
 
-   
-    for (int t = 0; t < TotalTeams; ++t)
+    for (int t = 0; t < getTotalTeams(); ++t)
     {
-       
+        MyTeams *currentTeam = getTeamByIndex(t);
+        if (currentTeam == NULL)
+            continue;
+
         int cnt = 0;
-        MyPlayer *cur = team[t].playerHead;
+        MyPlayer *cur = currentTeam->playerHead;
         while (cur)
         {
             if (cur->role == role) cnt++;
@@ -217,9 +223,8 @@ void displayAllPlayersOfAllTeams()
             return;
         }
 
-        
         int idx = 0;
-        cur = team[t].playerHead;
+        cur = currentTeam->playerHead;
         while (cur)
         {
             if (cur->role == role)
@@ -228,7 +233,6 @@ void displayAllPlayersOfAllTeams()
                 if (!copy)
                 {
                     printf("Memory allocation failed\n");
-                  
                     for (int j = 0; j < idx; ++j)
                     {
                         free(arr[j].player->name);
@@ -256,20 +260,16 @@ void displayAllPlayersOfAllTeams()
             cur = cur->next;
         }
 
-      
         for (int start = (idx / 2) - 1; start >= 0; --start)
             heapify(arr, idx, start);
 
-      
         int heapSize = idx;
         while (heapSize > 0)
         {
-        
             HeapNode top = arr[0];
             MyPlayer *p = top.player;
             p->next = NULL;
 
-        
             if (!finalHead)
             {
                 finalHead = finalTail = p;
@@ -280,25 +280,21 @@ void displayAllPlayersOfAllTeams()
                 finalTail = p;
             }
 
-            
             arr[0] = arr[heapSize - 1];
             heapSize--;
             if (heapSize > 0)
                 heapify(arr, heapSize, 0);
         }
 
-        
         free(arr);
     }
 
-   
     if (!finalHead)
     {
         printf("No players found for the selected role across all teams\n");
         return;
     }
 
-    
     printf("%s of all teams (Each team heap-sorted desc, appended by team)\n", roleToString(role));
     printf("=======================================================================================================\n");
     printf("%-5s %-25s %-20s %-15s %-8s %-8s %-8s %-8s %-8s %-12s\n",
@@ -323,7 +319,6 @@ void displayAllPlayersOfAllTeams()
     }
     printf("=======================================================================================================\n");
 
-   
     iter = finalHead;
     while (iter)
     {
