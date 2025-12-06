@@ -6,14 +6,12 @@
 #include "player.c"
 #include "utils.c"
 
-
-extern MyTeams team[TotalTeams];
-
 void exitPerformanceAnalyzer()
 {
-    for (int index = 0; index < TotalTeams; index++)
+    for (int index = 0; index < TOTAL_TEAMS; index++)
     {
-        MyPlayer *temp = team[index].playerHead;
+        MyTeams *currentTeam = getTeamByIndex(index);
+        MyPlayer *temp = currentTeam->playerHead;
 
         while (temp != NULL)
         {
@@ -23,7 +21,7 @@ void exitPerformanceAnalyzer()
             free(temp);
             temp = next;
         }
-        team[index].playerHead = NULL;
+        currentTeam->playerHead = NULL;
     }
 
     printf("Exiting the program\n");
@@ -51,7 +49,6 @@ int main()
 
         if (scanf("%d", &choice) != 1)
         {
-            
             int c;
             while ((c = getchar()) != '\n' && c != EOF)
                 ;
