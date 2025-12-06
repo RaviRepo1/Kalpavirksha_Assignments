@@ -1,12 +1,11 @@
 #ifndef TYPES_H
 #define TYPES_H
 
-#define TotalTeams 10
-#define TotalPlayers 200
+#define TOTAL_TEAMS 10
+#define TOTAL_PLAYERS 200
 
 typedef enum
 {
-    ROLE_UNKNOWN = 0,
     ROLE_BATSMAN = 1,
     ROLE_BOWLER = 2,
     ROLE_ALL_ROUNDER = 3
