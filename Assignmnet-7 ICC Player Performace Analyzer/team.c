@@ -5,12 +5,37 @@
 #include "team.h"
 #include "utils.h"
 
-MyTeams team[TotalTeams];
+
+static MyTeams team[TOTAL_TEAMS];
+
+MyTeams* getTeamByIndex(int index)
+{
+    if (index >= 0 && index < TOTAL_TEAMS)
+    {
+        return &team[index];
+    }
+    return NULL;
+}
+
+MyTeams* getTeamById(int teamId)
+{
+    int index = searchTeamById(teamId, team);
+    if (index != -1)
+    {
+        return &team[index];
+    }
+    return NULL;
+}
+
+int getTotalTeams()
+{
+    return TOTAL_TEAMS;
+}
 
 void initializeData()
 {
-    // initialize team data
-    for (int index = 0; index < TotalTeams; index++)
+ 
+    for (int index = 0; index < TOTAL_TEAMS; index++)
     {
         team[index].id = index + 1;
         team[index].name = teams[index];
@@ -19,8 +44,8 @@ void initializeData()
         team[index].playerHead = NULL;
     }
 
-    // initialize player data
-    for (int index = 0; index < TotalPlayers; index++)
+ 
+    for (int index = 0; index < TOTAL_PLAYERS; index++)
     {
         Player playerData = players[index];
 
@@ -32,9 +57,9 @@ void initializeData()
         }
 
         p->id = playerData.id;
-        p->name = strdup(playerData.name); // own a copy so we can free later
+        p->name = strdup(playerData.name);
         p->team = playerData.team;
-        p->role = getRoleFromString(playerData.role); // convert to enum
+        p->role = getRoleFromString(playerData.role);
         p->totalRuns = playerData.totalRuns;
         p->battingAverage = playerData.battingAverage;
         p->strikeRate = playerData.strikeRate;
@@ -42,7 +67,7 @@ void initializeData()
         p->economyRate = playerData.economyRate;
         p->next = NULL;
 
-        // calculating performance index (logic preserved)
+       
         if (p->role == ROLE_BATSMAN)
         {
             p->performanceIndex = (p->battingAverage * p->strikeRate) / 100;
@@ -60,7 +85,7 @@ void initializeData()
             p->performanceIndex = 0.0;
         }
 
-        for (int iterator = 0; iterator < TotalTeams; iterator++)
+        for (int iterator = 0; iterator < TOTAL_TEAMS; iterator++)
         {
             if (strcmp(team[iterator].name, p->team) == 0)
             {
@@ -73,12 +98,12 @@ void initializeData()
     }
 }
 
-void updateTeamAverageStrikeRate(MyTeams *team)
+void updateTeamAverageStrikeRate(MyTeams *teamPtr)
 {
     float totalStrikeRate = 0.0;
     int count = 0;
 
-    MyPlayer *temp = team->playerHead;
+    MyPlayer *temp = teamPtr->playerHead;
 
     while (temp != NULL)
     {
@@ -90,7 +115,7 @@ void updateTeamAverageStrikeRate(MyTeams *team)
         temp = temp->next;
     }
 
-    team->averageBattingStrikeRate = (count > 0) ? totalStrikeRate / count : 0.0;
+    teamPtr->averageBattingStrikeRate = (count > 0) ? totalStrikeRate / count : 0.0;
 }
 
 void addPlayerToTeam()
@@ -99,21 +124,19 @@ void addPlayerToTeam()
     printf("Enter Team ID To Add Player: ");
     scanf("%d", &teamId);
 
-    if (teamId < 1 || teamId > TotalTeams)
+    if (teamId < 1 || teamId > TOTAL_TEAMS)
     {
         printf("Invalid Team ID\n");
         return;
     }
 
-    int index = searchTeamById(teamId);
+    MyTeams *selectedTeam = getTeamById(teamId);
 
-    if (index == -1)
+    if (selectedTeam == NULL)
     {
         printf("Team not found\n");
         return;
     }
-
-    MyTeams *selectedTeam = &team[index];
 
     MyPlayer *newPlayer = (MyPlayer *)malloc(sizeof(MyPlayer));
     if (!newPlayer)
@@ -132,7 +155,7 @@ void addPlayerToTeam()
     printf("Name: ");
     fgets(words, sizeof(words), stdin);
     words[strcspn(words, "\n")] = '\0';
-    newPlayer->name = strdup(words); // own a copy
+    newPlayer->name = strdup(words);
 
     newPlayer->team = selectedTeam->name;
 
@@ -183,7 +206,7 @@ void addPlayerToTeam()
     {
         newPlayer->performanceIndex = (newPlayer->wickets * 2) + (100 - newPlayer->economyRate);
     }
-    else // all-rounder
+    else
     {
         newPlayer->performanceIndex = ((newPlayer->battingAverage * newPlayer->strikeRate) / 100) + (newPlayer->wickets * 2);
     }
@@ -202,24 +225,22 @@ void displayPlayersOfSpecificTeam()
     if (scanf("%d", &teamId) != 1)
     {
         printf("Invalid input\n");
-        // clear stdin if needed
         return;
     }
 
-    if (teamId < 1 || teamId > TotalTeams)
+    if (teamId < 1 || teamId > TOTAL_TEAMS)
     {
         printf("Invalid Team ID\n");
         return;
     }
 
-    int index = searchTeamById(teamId);
-    if (index == -1)
+    MyTeams *selectedTeam = getTeamById(teamId);
+    if (selectedTeam == NULL)
     {
         printf("Team not found\n");
         return;
     }
 
-    MyTeams *selectedTeam = &team[index]; // use pointer to real team (not a copy)
     MyPlayer *head = selectedTeam->playerHead;
 
     printf("Players of Team %s:\n", selectedTeam->name);
@@ -234,7 +255,6 @@ void displayPlayersOfSpecificTeam()
         return;
     }
 
-    // Update average strike rate for the real team
     updateTeamAverageStrikeRate(selectedTeam);
 
     MyPlayer *current = head;
@@ -255,7 +275,7 @@ void displayPlayersOfSpecificTeam()
         printed++;
         current = current->next;
         if (printed >= selectedTeam->totalPlayers)
-            break; // defensive but fine for singly-linked lists
+            break;
     }
 
     printf("Total Players: %d\n", selectedTeam->totalPlayers);
@@ -264,21 +284,21 @@ void displayPlayersOfSpecificTeam()
 
 void displayTeamsByAverageBattingStrikeRate()
 {
-    for (int index = 0; index < TotalTeams; index++)
+    for (int index = 0; index < TOTAL_TEAMS; index++)
     {
         updateTeamAverageStrikeRate(&team[index]);
     }
 
-    MyTeams sortedTeam[TotalTeams];
+    MyTeams sortedTeam[TOTAL_TEAMS];
 
-    for (int index = 0; index < TotalTeams; index++)
+    for (int index = 0; index < TOTAL_TEAMS; index++)
     {
         sortedTeam[index] = team[index];
     }
 
-    for (int index = 0; index < TotalTeams - 1; index++)
+    for (int index = 0; index < TOTAL_TEAMS - 1; index++)
     {
-        for (int iterator = index + 1; iterator < TotalTeams; iterator++)
+        for (int iterator = index + 1; iterator < TOTAL_TEAMS; iterator++)
         {
             if (sortedTeam[index].averageBattingStrikeRate < sortedTeam[iterator].averageBattingStrikeRate)
             {
@@ -294,7 +314,7 @@ void displayTeamsByAverageBattingStrikeRate()
     printf("%-5s %-25s %-20s %-5s\n", "ID", "Name", "Avg Bat SR", "Total Players");
     printf("===============================================================\n");
 
-    for (int index = 0; index < TotalTeams; index++)
+    for (int index = 0; index < TOTAL_TEAMS; index++)
     {
         printf("%-5d %-25s %-20.2f %-5d\n", sortedTeam[index].id, sortedTeam[index].name, sortedTeam[index].averageBattingStrikeRate, sortedTeam[index].totalPlayers);
     }
