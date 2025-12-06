@@ -1,8 +1,6 @@
 #include <string.h>
 #include "utils.h"
 
-extern MyTeams team[TotalTeams];
-
 const char *roleToString(PlayerRole r)
 {
     switch (r)
@@ -14,36 +12,36 @@ const char *roleToString(PlayerRole r)
     case ROLE_ALL_ROUNDER:
         return "All-rounder";
     default:
-        return "Unknown";
+        return "Invalid Role";
     }
 }
 
 PlayerRole getRoleFromString(const char *s)
 {
     if (s == NULL)
-        return ROLE_UNKNOWN;
+        return ROLE_BATSMAN; 
     if (strcmp(s, "Batsman") == 0)
         return ROLE_BATSMAN;
     if (strcmp(s, "Bowler") == 0)
         return ROLE_BOWLER;
     if (strcmp(s, "All-rounder") == 0 || strcmp(s, "All rounder") == 0)
         return ROLE_ALL_ROUNDER;
-    return ROLE_UNKNOWN;
+    return ROLE_BATSMAN; 
 }
 
-int searchTeamById(int id)
+int searchTeamById(int id, MyTeams teams[])
 {
     int low = 0;
-    int high = TotalTeams - 1;
+    int high = TOTAL_TEAMS - 1;
 
     while (low <= high)
     {
         int mid = low + (high - low) / 2;
-        if (team[mid].id == id)
+        if (teams[mid].id == id)
         {
             return mid;
         }
-        else if (team[mid].id > id)
+        else if (teams[mid].id > id)
         {
             high = mid - 1;
         }
