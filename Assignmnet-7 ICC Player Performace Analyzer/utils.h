@@ -5,6 +5,6 @@
 
 const char *roleToString(PlayerRole r);
 PlayerRole getRoleFromString(const char *s);
-int searchTeamById(int id);
+int searchTeamById(int id, MyTeams teams[]);
 
 #endif
